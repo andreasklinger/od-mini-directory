@@ -4,12 +4,14 @@
   "license": "MIT",
   "scripts": {
     "start": "nodemon -w src --ext ts --exec ts-node src/index.ts",
+    "migration:gen": "ts-node ./node_modules/.bin/typeorm migration:generate",
+    "migration:run": "ts-node ./node_modules/.bin/typeorm migration:run",
     "seeds": "ts-node src/db/seeds.ts"
   },
   "dependencies": {
     "apollo-server": "^2.9.16",
     "reflect-metadata": "^0.1.13",
-    "sqlite3": "^4.1.1",
+    "sqlite3": "^5.0.0",
     "type-graphql": "^0.17.6",
     "typeorm": "^0.2.22"
   },
