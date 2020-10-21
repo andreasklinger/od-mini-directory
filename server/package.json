@@ -9,7 +9,9 @@
     "seeds": "ts-node src/db/seeds.ts"
   },
   "dependencies": {
+    "@types/faker": "^5.1.2",
     "apollo-server": "^2.9.16",
+    "faker": "^5.1.0",
     "reflect-metadata": "^0.1.13",
     "sqlite3": "^5.0.0",
     "type-graphql": "^0.17.6",

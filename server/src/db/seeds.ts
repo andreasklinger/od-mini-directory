@@ -1,31 +1,20 @@
-import { connectDatabase } from './index';
+import { getRepository } from 'typeorm';
+import { connectDatabase } from '.';
+import { User } from '../entities/User';
+import { generateRandomUsers } from '../utils/faker';
 
-const users = [
-  {
-    id: 1,
-    name: 'Testov Testovic',
-    shortBio: 'I was born.',
-    isVerified: false,
-  },
-  { id: 2, name: 'Abe Betov', shortBio: 'I also born.', isVerified: false },
-  { id: 3, name: 'Cesar Julio', shortBio: 'I later born.', isVerified: true },
-];
+const randomUsers = generateRandomUsers();
+
 const seed = async () => {
   try {
     console.log('[seed] : running...');
-
-    const db = await connectDatabase();
-
-    db.usersRepo.clear();
-    const newUser = db.usersRepo.create(users[0]);
-    await db.usersRepo.save(newUser);
-    await users.forEach((user) => {
-      const newUser = db.usersRepo.create(user);
-      db.usersRepo.save(newUser);
-    });
-
+    await connectDatabase();
+    const userRepo = await getRepository(User);
+    await userRepo.clear();
+    const users = randomUsers.map((user) => userRepo.create(user));
+    await userRepo.save(users);
     console.log('[seed] : success');
-  } catch {
+  } catch (e) {
     throw new Error('failed to seed database');
   }
 };
