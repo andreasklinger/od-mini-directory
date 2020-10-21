@@ -15,6 +15,7 @@ const seed = async () => {
     await userRepo.save(users);
     console.log('[seed] : success');
   } catch (e) {
+    console.log(e);
     throw new Error('failed to seed database');
   }
 };

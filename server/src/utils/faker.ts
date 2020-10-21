@@ -6,8 +6,9 @@ const generateRandomUser = (): User => {
   const name = faker.name.findName();
   const shortBio = faker.lorem.sentence();
   const isVerified = faker.random.boolean();
+  const avatar = faker.image.avatar();
 
-  return { id, name, shortBio, isVerified };
+  return { id, name, shortBio, isVerified, avatar };
 };
 
 export const generateRandomUsers = (total: number = 100): User[] => {
