@@ -59,7 +59,7 @@ export const UserList: React.FC = () => {
             },
             // @ts-ignore
             updateQuery: (prevResult, { fetchMoreResult }) => {
-              if (!fetchMoreResult) {
+              if (!fetchMoreResult?.Users) {
                 return prevResult;
               } else {
                 const newUsers = [
