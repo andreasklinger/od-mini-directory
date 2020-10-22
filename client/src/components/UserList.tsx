@@ -1,36 +1,60 @@
-import React from 'react';
-import { useQuery, gql } from '@apollo/client';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { UserItem } from './UserItem';
-import { User } from '../models/User';
+import useUserSearch from '../utils/useUserSearch';
 
-interface UserData {
-  Users: User[];
-}
+export const UserList: React.FC = () => {
+  const [query, setQuery] = useState<string>('');
 
-interface UserVars {
-  name: string;
-}
+  const observer = useRef<IntersectionObserver>();
 
-const GET_ROCKET_INVENTORY = gql`
-  query GetUsers {
-    Users {
-      id
-      name
-      shortBio
-      isVerified
-      avatar
-    }
-  }
-`;
+  const { loading, data, error, fetchMore, skip } = useUserSearch(0, 20, query);
 
-export function UserList() {
-  const { loading, data } = useQuery<UserData, UserVars>(
-    GET_ROCKET_INVENTORY,
-    {},
+  const users = data?.Users;
+
+  const hasMore = users?.length && users.length % 20 === 0;
+
+  const lastUserRef = useCallback(
+    (node: HTMLTableRowElement) => {
+      if (loading) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          fetchMore({
+            variables: {
+              skip: skip + 20,
+            },
+            // @ts-ignore
+            updateQuery: (prevResult, { fetchMoreResult }) => {
+              console.log(skip);
+              if (!fetchMoreResult) {
+                return prevResult;
+              } else {
+                const newUsers = [
+                  ...prevResult.Users,
+                  ...fetchMoreResult.Users,
+                ];
+                return {
+                  ...prevResult,
+                  Users: newUsers,
+                };
+              }
+            },
+          });
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loading, hasMore],
   );
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setQuery(e.target.value);
+  };
+
   return (
     <div className='text-center container'>
       <h3>Users</h3>
+      <input type='text' onChange={handleSearch} />
       {loading ? (
         <p>Loading ...</p>
       ) : (
@@ -43,10 +67,24 @@ export function UserList() {
             </tr>
           </thead>
           <tbody>
-            {data && data.Users.map((user) => <UserItem user={user} />)}
+            {users
+              ? users.map((user, idx) => {
+                  if (users.length === idx + 1)
+                    return (
+                      <tr ref={lastUserRef} key={user.id}>
+                        <UserItem user={user} />
+                      </tr>
+                    );
+                  return (
+                    <tr key={user.id}>
+                      <UserItem user={user} />
+                    </tr>
+                  );
+                })
+              : null}
           </tbody>
         </table>
       )}
     </div>
   );
-}
+};

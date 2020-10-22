@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from './logo.svg';
+
 import './App.css';
 import { UserList } from './components/UserList';
 
@@ -14,7 +14,7 @@ function App() {
   return (
     <ApolloProvider client={client}>
       <div className='App'>
-        <header className='App-header'>
+        <header className='App-header text-center'>
           <UserList />
         </header>
       </div>

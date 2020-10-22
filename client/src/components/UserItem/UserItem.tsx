@@ -8,13 +8,13 @@ interface IProps {
 const UserItem: React.FC<IProps> = ({ user }) => {
   const { avatar, name, shortBio } = user;
   return (
-    <tr>
+    <>
       <td>
         <img src={avatar} alt={name} className='avatar' />
       </td>
       <td className='text-center'>{name}</td>
       <td className='text-left'>{shortBio}</td>
-    </tr>
+    </>
   );
 };
 export default UserItem;
