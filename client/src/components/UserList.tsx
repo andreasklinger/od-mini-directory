@@ -1,17 +1,49 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { gql, useQuery } from '@apollo/client';
 import { UserItem } from './UserItem';
-import useUserSearch from '../utils/useUserSearch';
+
+import { User } from '../models/User';
+
+const GET_USERS = gql`
+  query Users($skip: Float!, $take: Float!, $searchTerm: String!) {
+    Users(skip: $skip, take: $take, searchTerm: $searchTerm) {
+      id
+      name
+      shortBio
+      isVerified
+      avatar
+    }
+  }
+`;
+
+interface QueryVars {
+  skip: number;
+  take: number;
+  searchTerm: string;
+}
+
+interface UserData {
+  Users: User[];
+}
 
 export const UserList: React.FC = () => {
   const [query, setQuery] = useState<string>('');
 
   const observer = useRef<IntersectionObserver>();
 
-  const { loading, data, error, fetchMore, skip } = useUserSearch(0, 20, query);
+  const [skip, setSkip] = useState(0);
+
+  const { loading, data, error, fetchMore } = useQuery<UserData, QueryVars>(
+    GET_USERS,
+    {
+      variables: { skip: skip, take: 20, searchTerm: query },
+    },
+  );
 
   const users = data?.Users;
 
-  const hasMore = users?.length && users.length % 20 === 0;
+  const hasMore =
+    users?.length && users.length !== 200 && users.length % 20 === 0;
 
   const lastUserRef = useCallback(
     (node: HTMLTableRowElement) => {
@@ -19,13 +51,14 @@ export const UserList: React.FC = () => {
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasMore) {
+          setSkip(skip + 20);
+
           fetchMore({
             variables: {
-              skip: skip + 20,
+              skip: skip,
             },
             // @ts-ignore
             updateQuery: (prevResult, { fetchMoreResult }) => {
-              console.log(skip);
               if (!fetchMoreResult) {
                 return prevResult;
               } else {
